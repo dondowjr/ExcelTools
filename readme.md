@@ -1,8 +1,8 @@
-# Excel Tools
+# Excel Tools & Code
 
 This repository contains macros and other macro-related code clips for use in Excel.
 
-## TreeNode.cls
+## [TreeNode.cls](https://github.com/dondowjr/ExcelTools-repo/blob/main/TreeNode.cls)
 
 This class represents a nestable tree node object. 
 
@@ -23,5 +23,3 @@ If a backup is made, the code checks if there are old copies that can be purged.
 Inside the code, there is a custom settings block that allows you to specify how many copies to keep and whether to always back up to the 'Documents' library.
 
 To implement this code, place the code bock into the code window for the ‘ThisWorkbook’ Class.
-
-
