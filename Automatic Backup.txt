@@ -1,0 +1,259 @@
+Option Explicit
+
+Private Sub Workbook_Open()
+
+    CheckBackups
+
+End Sub
+
+
+Private Sub CheckBackups()
+    
+    ' This routine makes a backup of the workbook that is currently being opened.
+    ' If the workbook is on a local or network drive, the backups are stored in
+    ' the same folder as the opened workbook in a folder called "backups". If the
+    ' workbook is opened from an on-line repository, a backup will be made in the
+    ' user's 'Documents' library under a folder called "Office Backups". The number
+    ' of previous backups stored are dependent on the custom settings.
+    
+    
+    Dim vPath As String                 ' path to the backup folder
+    Dim vName As String                 ' name of the current workbook
+    Dim vBackupFile As String           ' name of the backup file
+    Dim vPurgeMask As String            ' name mask for purging old files
+    Dim vPurgeFile As String            ' name of a file to purge
+    Dim vDatePart As String             ' date text to append to backup file name
+    Dim vFileCount As Long              ' purge file count
+    Dim vPurgeBackups As Boolean        ' flag to purge backup files
+    Dim vCopysToKeep As Long            ' number of backup copies to keep
+    Dim vForceDocsLibrary As Boolean    ' flag to force using the documents library
+    
+    ' -- Custom Settings --
+    
+    vCopysToKeep = 2           ' The number of backup copies to keep
+    vForceDocsLibrary = False  ' Set to True to always use the Documents library
+        
+    '---------------------
+    
+
+    ' get backup path (create if needed)
+    If Not GetBackupPath(vPath, vForceDocsLibrary) Then Exit Sub
+    
+    ' get the date tag for the backup file name
+    vDatePart = Format(Now, "yyyy-mm-dd")
+    
+    ' get the workbook name
+    vName = ActiveWorkbook.Name
+    
+    ' build the backup file name
+    vBackupFile = vPath & Replace(vName, ".xls", "_" & vDatePart & ".xls", , , vbTextCompare)
+    vPurgeMask = vPath & Replace(vName, ".xls", "*.xls", , , vbTextCompare)
+    
+    ' check to see if we need to make a backup
+    ' if so, then skip it
+    If FileExists(vBackupFile) Then Exit Sub
+    
+    ' prompt to see if we make a backup
+    If MsgBox("A backup copy of this workbook has not been generated today. " & _
+              "Do you want to create a copy now (recommended)?", _
+              vbYesNo + vbQuestion, _
+              "Make backup copy?") = vbNo Then
+        
+        ' not making backups - exit
+        Exit Sub
+    
+    End If
+    
+    ' save the workbook
+    ActiveWorkbook.SaveCopyAs vBackupFile
+    
+    ' let the user know it was done
+    MsgBox "Backup made.", _
+           vbInformation, _
+           "Backup workbook"
+    
+    ' validate we have a reasonable number of copies to keep
+    If vCopysToKeep < 1 Then Exit Sub
+    
+    ' find first backup file based on mask
+    vPurgeFile = Dir(vPurgeMask, vbDirectory)
+
+    ' loop through found files
+    Do While vPurgeFile <> ""
+    
+        ' skip nav folders/files
+        If vPurgeFile <> "." And vPurgeFile <> ".." Then
+            
+            ' count files found
+            vFileCount = vFileCount + 1
+            
+            ' check to see if we are over the keep count
+            If vFileCount > vCopysToKeep Then
+            
+                ' make sure we don't purge the current backup by mistake
+                If vPath & vPurgeFile <> vBackupFile Then
+                
+                    If Not vPurgeBackups Then
+                    
+                        If MsgBox("Old backups exist. Do you want to remove them now?", _
+                                  vbYesNo + vbQuestion, _
+                                  "Purge old backups?") = vbYes Then
+                                  
+                            vPurgeBackups = True
+                            
+                        Else
+                        
+                            ' skip purging backups
+                            Exit Do
+                            
+                        End If
+                        
+                    End If
+                    
+                    ' update the file attribs and delete
+                    SetAttr vPath & vPurgeFile, vbNormal
+                    Kill vPath & vPurgeFile
+                
+                End If
+            
+            End If
+            
+        End If
+                            
+        ' get the next file
+        vPurgeFile = Dir()
+    
+    Loop
+        
+ErrorTrap:
+
+    DisplayIfError "Workbook.CheckBackups"
+
+End Sub
+
+Private Function GetBackupPath(ByRef vPath As String, _
+                               ByVal vForceDocs As Boolean) As Boolean
+
+    ' Generates the backup path. If the path does not exist it will
+    ' be created.
+    '
+    ' Returns True if the path can be obtained and created
+
+    On Error GoTo ErrorTrap:
+
+    ' get the path for the current workbook
+    vPath = LCase(ActiveWorkbook.Path)
+    
+    ' check to see if the workbook is online or if we are going to force backing
+    ' up to the user's document library.
+    If Left(vPath, 4) = "http" Or _
+        vPath Like "*onedrive -*" Or _
+        vForceDocs Then
+         
+        ' get the path to the users documents library
+        vPath = Environ("UserProfile") & "\Documents\"
+        
+        ' check to see if the Documents library exists
+        If FileExists(vPath) Then
+        
+            ' add on the "Office Backups" folder to the backup path
+            vPath = vPath & "Office Backups\"
+            
+        Else
+        
+            MsgBox "Cannot make a backup of this workbook on this machine. " & _
+                   "The user's 'Documents' library is not accessible.", _
+                   vbExclamation, _
+                   "Backup Workbook"
+                   
+            Exit Function
+            
+        End If
+    Else
+    
+        ' Add 'backups' to the current workbook's current location
+        vPath = vPath & "\backups\"
+        
+    End If
+    
+    ' check to see if the backup path exists
+    If Not FileExists(vPath) Then
+    
+        ' create the backup path
+        MkDir vPath
+        
+        ' validate that the backup path was created
+        If Not FileExists(vPath) Then
+        
+            MsgBox "Cannot make a backup of this workbook using this machine or user account.", _
+                    vbExclamation, _
+                    "Backup Workbook"
+                    
+            Exit Function
+            
+        End If
+        
+    End If
+
+    GetBackupPath = True
+    
+ErrorTrap:
+
+    DisplayIfError "Workbook.GetBackupPath"
+    
+End Function
+
+
+'-- helper functions --
+
+Private Function FileExists(vFilename As String) As Boolean
+
+    ' Check to see if a file or directory exist.
+    ' If checking a directory, make sure the path ends in a slash \
+
+    ' Note: If the file or directory does not exist, Dir will return
+    '       an empty string
+    FileExists = Not LenB(Dir(vFilename, vbDirectory)) = 0
+
+End Function
+
+Private Function DisplayIfError(ByVal vRoutine As String)
+
+    ' Display error information if the error object has been set.
+    
+    If Not Err.Number = 0 Then
+        DisplayError vRoutine, Err.Number, Err.Description
+        DisplayIfError = True
+    End If
+
+End Function
+
+Private Function DisplayError(ByVal vRoutine As String, _
+                              ByVal vErrNum As Long, _
+                              ByVal vErrMsg As String)
+                             
+    'Display an error message
+    
+    MsgBox StrSwapValues("Error in '{1}' - {2} {3}", vRoutine, vErrNum, vErrMsg), vbCritical, "Trapped Error"
+                                                        
+                            
+End Function
+ 
+Private Function StrSwapValues(ByVal vSource, _
+                               ParamArray vValues() As Variant) As String
+
+    ' swaps codes for values. codes are in the format of {#}. example: {1},{2},...
+    ' Note that codes begin with 1
+
+    Dim i As Long
+    
+    For i = LBound(vValues) To UBound(vValues)
+        vSource = Replace(vSource, "{" & i + 1 & "}", vValues(i))
+    Next
+    
+    StrSwapValues = vSource
+
+End Function
+
+
+
