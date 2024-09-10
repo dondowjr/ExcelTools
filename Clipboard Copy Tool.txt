@@ -1,0 +1,198 @@
+Option Explicit
+
+' See Clipboard Copy Tool Setup Instructions
+
+Private mLastRow As Long
+
+' standard excel fill colors
+Private Enum ColorIndexEnum
+    ciNone = 0
+    ciBlack = 1
+    ciWhite = 57
+    
+    ciGreyLight = 15
+    ciGrey = 48
+    ciGreyDark = 16
+    
+    ciBlueLight = 37
+    ciBlue = 41
+    ciBlueDark = 49
+    
+    ciOrange = 46
+    
+    ciGold = 44
+    
+    ciYellow = 6
+    
+    ciGreenLight = 35
+    ciGreen = 10
+    ciGreenDark = 51
+    
+    ciRedLight = 22
+    ciRed = 3
+    ciRedDark = 30
+    
+End Enum
+
+
+
+Private Function IsEnabled() As Boolean
+
+    IsEnabled = CellValue(2, 2) = "Copying is On"
+    
+End Function
+
+
+
+Private Sub SetHighlight(ByVal vRow As Long)
+
+    ' see if we already have a highlight
+    If mLastRow = 0 Or FillColor(vRow, 3) = ciNone Then
+        
+        ' reset coloring for sheet
+        ClearHighlight
+        
+    Else
+    
+        ' reset coloring for last row
+        FillColor(mLastRow, 3) = ciNone
+        
+    End If
+    
+    ' set the background to yellow
+    FillColor(vRow, 3) = ciYellow
+    
+    ' set the last row highlighted
+    mLastRow = vRow
+    
+End Sub
+
+
+
+Private Sub ClearHighlight()
+
+    ' clears the yellow highlighting for
+    ' the entier sheet
+
+    Dim i As Long
+    
+    For i = 1 To 1000
+        
+        If FillColor(i, 3) = ciYellow Then
+        
+            FillColor(i, 3) = ciNone
+        
+        End If
+                
+    Next
+
+End Sub
+
+
+
+Private Property Get FillColor(ByVal vRow As Long, _
+                               ByVal vCol As Long) As ColorIndexEnum
+                              
+    FillColor = Cells(vRow, vCol).Interior.ColorIndex
+                              
+End Property
+
+Private Property Let FillColor(ByVal vRow As Long, _
+                               ByVal vCol As Long, _
+                               ByVal vValue As ColorIndexEnum)
+                              
+    Cells(vRow, vCol).Interior.ColorIndex = vValue
+                              
+End Property
+
+
+
+Private Sub SetClipboard(ByVal vText As String)
+
+    ' set the clipboard by using the htmlfile COM (ActiveX) object
+
+    With CreateObject("htmlfile")
+        .parentWindow.Clipboarddata.SetData "text", vText
+    End With
+
+End Sub
+
+
+
+Private Property Get CellValue(ByVal vRow As Long, _
+                               ByVal vCol As Long) As String
+
+    If vRow > 0 And vCol > 0 Then
+    
+        CellValue = Cells(vRow, vCol).Value
+    
+    End If
+
+End Property
+
+Private Property Let CellValue(ByVal vRow As Long, _
+                               ByVal vCol As Long, _
+                               ByVal vData As String)
+                               
+    If vRow > 0 And vCol > 0 Then
+    
+        Cells(vRow, vCol).Value = vData
+    
+    End If
+                               
+End Property
+
+                               
+
+Private Sub Worksheet_SelectionChange(ByVal Target As Range)
+
+    Dim vRow As Long
+    Dim vCol As Long
+    Dim vText As String
+    
+    ' verify the function is enabled and the target
+    ' contains only one cell.
+    If Target.Cells.Count = 1 Then
+    
+        vRow = Target.Row
+        vCol = Target.Column
+        
+        ' check to toggle functionality
+        If vRow = 2 And vCol = 2 Then
+        
+            If CellValue(vRow, vCol) = "Copying is On" Then
+                CellValue(vRow, vCol) = "Copying is Off"
+                FillColor(vRow, vCol) = ciRedLight
+            Else
+                CellValue(vRow, vCol) = "Copying is On"
+                FillColor(vRow, vCol) = ciGreenLight
+            End If
+            
+            ' reset the highlighting and put focus on
+            ' the start of the list
+            mLastRow = 0
+            ClearHighlight
+            Cells(5, 2).Activate
+            Exit Sub
+            
+        End If
+        
+        ' check to see if we need to copy text to
+        ' the clipboard
+        If IsEnabled And vCol = 3 And vRow > 4 Then
+        
+            vText = CellValue(vRow, vCol)
+            
+            ' dont copy if a blank value
+            If vText <> "" Then
+            
+                SetClipboard vText
+                SetHighlight vRow
+            
+            End If
+        
+        End If
+    
+    End If
+    
+End Sub
