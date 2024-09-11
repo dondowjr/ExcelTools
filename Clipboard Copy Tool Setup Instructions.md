@@ -25,24 +25,24 @@ The layout Workbook is faily simple. There are three main components, the first 
 	a.	Click on File > Save As >  Browse  
 	b.	Give your spreadsheet a name  
 	c.	Change the Save as Type to: Excel Macro Enabled Workbook  
-	d.	Click Save
-7.	Enable the Developer “tab”
-	a.	File > Options
-	b.	Customize Ribbon
-	c.	Select “Main Tabs” in the “Customize the Ribbon” drop list (right side of the window.)
-	d.	Find the “Developer” option in the list and check it.
-	e.	Click OK
-	f.	You should now see the Developer tab
+	d.	Click Save  
+7.	Enable the Developer “tab”:  
+	a.	File > Options  
+	b.	Customize Ribbon  
+	c.	Select “Main Tabs” in the “Customize the Ribbon” drop list (right side of the window.)  
+	d.	Find the “Developer” option in the list and check it.  
+	e.	Click OK  
+	f.	You should now see the Developer tab  
 
 ## Adding the VBA Code
 
-1.	Open the code window for Sheet1:
-	a.	Click on the Developer tab, then click on Visual Basic icon
+1.	Open the code window for Sheet1:  
+	a.	Click on the Developer tab, then click on Visual Basic icon  
 	b.	Under the VBAProject node in the tree (left side), find the “Sheet1” node and double click it. This will open the code window for Sheet1
-2.	Get the VBA code from this location (To open a new tab, use CTRL+click for Windows and Linux or CMD+click on MacOS): [VBA Code](https://github.com/dondowjr/ExcelTools-repo/blob/main/Clipboard%20Copy%20Tool.txt)
-3.	Copy all the code from this link into the Sheet1 code window
-4.	Click on the save icon in the VBA editor
-5.	Close the VBA window.
+2.	Get the VBA code from this location (To open a new tab, use CTRL+click for Windows and Linux or CMD+click on MacOS): [VBA Code](https://github.com/dondowjr/ExcelTools-repo/blob/main/Clipboard%20Copy%20Tool.txt)  
+3.	Copy all the code from this link into the Sheet1 code window  
+4.	Click on the save icon in the VBA editor  
+5.	Close the VBA window  
 
 ## How to Use
 
