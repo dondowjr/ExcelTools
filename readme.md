@@ -22,7 +22,7 @@ If a backup is made, the code checks if there are old copies that can be purged.
 
 Inside the code, there is a custom settings block that allows you to specify how many copies to keep and whether to always back up to the 'Documents' library.
 
-To implement this code, place the code bock into the code window for the ‘ThisWorkbook’ Class.
+To implement this code, place the code bock into the code window for the â€˜ThisWorkbookâ€™ Class.
 
 
 ## Clipboard Copy Tool
@@ -33,4 +33,4 @@ To implement this code, place the code bock into the code window for the ‘ThisWo
 
 [Clipboard Copy Tool workbook](https://github.com/dondowjr/ExcelTools-repo/blob/main/Clipboard%20Copy%20Tool.xlsm)
 
-The code and instructions referenced above sets up an excel workbook that allows for copying text to the clipboard by simply clicking into a cell. This is a handy tool when you have a situations where lots of data needs to be filled into an app or website repeatedly.
+The code and instructions referenced above help you set up an Excel workbook that allows copying cell text to the clipboard by simply clicking into a cell. This tool is handy when you lots of data needs to be repeatedly filled into an app or website.
