@@ -2,6 +2,11 @@
 
 This repository contains macros and other macro-related code clips for use in Excel.
 
+## [Automation Templates.xlsm](https://github.com/dondowjr/ExcelTools-repo/blob/main/Automation%20Templates.xlsm)  
+
+This workbook contains tabs that provide various automation features. Automation features can be added to other workbooks by simply copying tabs from this workbook into other workbooks.  
+
+
 ## [TreeNode.cls](https://github.com/dondowjr/ExcelTools-repo/blob/main/TreeNode.cls)
 
 This class represents a nestable tree node object. 
